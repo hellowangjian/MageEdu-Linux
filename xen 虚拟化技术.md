@@ -66,4 +66,13 @@
     + IO 设备为 PV 模式运行
     + 运行于 DomU 中的 OS：只要 OS 能驱动 PV 接口类型的 IO 设备；
         * net-front, blk-front
+   
+- Xen 的工具栈
+    + xm/xend：在 Xen Hypervisor 的 Dom0 中要启动 xend 服务
+        * xm：命令行管理工具，有诸多子命令：
+            - create
+            - destroy
+            - stop
+            - pause
+    + xl
 
