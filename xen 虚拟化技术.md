@@ -69,9 +69,9 @@
 
 
 - Xen 的工具栈  
-    + xm/xend：在 Xen Hypervisor 的 Dom0 中要启动 xend 服务  
-        * xm：命令行管理工具，有诸多子命令：
-            - create
+    + xm/xend：在 Xen Hypervisor 的 Dom0 中要启动 xend 服务   
+        * xm：命令行管理工具，有诸多子命令：
+            - create
             - destroy
             - stop
             - pause
