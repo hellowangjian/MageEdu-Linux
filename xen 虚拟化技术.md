@@ -69,8 +69,7 @@
 
 
 - Xen 的工具栈  
-
-    + xm/xend：在 Xen Hypervisor 的 Dom0 中要启动 xend 服务
+    + xm/xend：在 Xen Hypervisor 的 Dom0 中要启动 xend 服务  
         * xm：命令行管理工具，有诸多子命令：
             - create
             - destroy
@@ -78,7 +77,6 @@
             - pause
     + xl：基于 libxenlight 提供的轻量级的命令行工具栈；
     + xe/xapi：提供了对 xen 管理的 api， 因此多用于 cloud 环境；Xen Server, XCP
-
     + virsh/libvirt：Libvirt 是一组软件的汇集，提供了管理虚拟机和其它虚拟化功能（如：存储和网络接口等）的便利途径。这些软件包括：一个长期稳定的 C 语言 API、一个守护进程（libvirtd）和一个命令行工具（virsh）。Libvirt 的主要目标是提供一个单一途径以管理多种不同虚拟化方案以及虚拟化主机，包括：KVM/QEMU，Xen，LXC，OpenVZ 或 VirtualBox hypervisors.
 
 - XenStore：
