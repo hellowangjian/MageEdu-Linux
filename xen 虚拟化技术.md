@@ -66,8 +66,10 @@
             - IO 设备为 PV 模式运行
             - 运行于 DomU 中的 OS：只要 OS 能驱动 PV 接口类型的 IO 设备；
                 + net-front, blk-front
-   
-- Xen 的工具栈
+
+
+- Xen 的工具栈  
+
     + xm/xend：在 Xen Hypervisor 的 Dom0 中要启动 xend 服务
         * xm：命令行管理工具，有诸多子命令：
             - create
@@ -251,6 +253,7 @@
         * swap 设备
         * 注意：xm 与 xl 启动 DomU 使用的配置文件略有不同；
         * 对于 xl 而言，其创建 DomU 使用的配置指令可通过 `man xl.cfg` 获取
+        ```
             - 常用指令：
                 + name：域唯一名称
                 + builder：指明虚拟机的类型，generic 表示 pv，hvm 表示 HVM
@@ -271,5 +274,10 @@
             - PV 模式专用指令：
                 + kernel="PATHNAME": 内核文件路径，此为 Dom0 中的路径；
                 + ramdisk="PATHNAME"：为 kernel 指定内核提供的 ramdisk 文件路径；
-                + bootloader="PROGRAM"：如果 DomU 使用自己的 kernel 及 ramdisk, 此时
+                + bootloader="PROGRAM"：如果 DomU 使用自己的 kernel 及 ramdisk, 此时需要一个 Dom0 中的应用程序来实现其 bootloader 功能；
+                + root="STRING"：指明根文件系统；
+                + extra="STRING"：额外传递给内核引导时使用的参数；
+            - 磁盘参数制定方式：
+                + 官方文档：http://xenbits.xen.org/docs/unstable/man/xl-disk-configuration.5.html
+        ```
 
