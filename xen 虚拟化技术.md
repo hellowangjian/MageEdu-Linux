@@ -277,5 +277,68 @@
                 + extra="STRING"：额外传递给内核引导时使用的参数；
             - 磁盘参数制定方式：
                 + 官方文档：http://xenbits.xen.org/docs/unstable/man/xl-disk-configuration.5.html
+                + [<target>, [<format>, [<vdev>, [<access>]]]]
+                    - <target> 表示磁盘映像文件或设备文件路径：/images/xen/linux.img, /dev/myvg/linux
+                    - <format> 表示磁盘格式，如果是映像文件，有多种格式，例如：raw, qcow, qcow2 ...
+                    - <vdev> 此设备在 DomU 被识别为硬件设备类型，支持hd[x], xvd[x], sd[x] etc.
+                    - <access> 访问权限，
+                        ro, r：只读
+                        rw, w：读写
+
+                        disk = [ "/images/xen/linux.img,raw,xvda,rw", ]
+                + 使用 qemu-img 管理磁盘映像文件
+                    - create [-f fmt] [-o options] filename [size]
+                        + 可创建 sparse(稀疏) 格式的磁盘映像文件，是默认格式
+                            # mkdir -pv /images/xen
+                            mkdir: created directory `/images'
+                            mkdir: created directory `/images/xen'
+                            两种创建方式：
+                            1、
+                            # qemu-img create -f raw -o size=2G /images/xen/busybox.img
+                            Formatting '/images/xen/busybox.img', fmt=raw size=2147483648
+                            2、
+                            # qemu-img create -f raw  /images/xen/busybox.img 2G 
+                            Formatting '/images/xen/busybox.img', fmt=raw size=2147483648 
+
+                            使用 ll 看是 2G，实则为 0
+                            # ll -h /images/xen/busybox.img 
+                            -rw-r--r--. 1 root root 2.0G Feb  4 17:03 /images/xen/busybox.img
+                            # du -sh /images/xen/busybox.img
+                            0       /images/xen/busybox.img
+
+                            格式化：
+                            # mke2fs -t ext2 busybox.img 
+                            mke2fs 1.41.12 (17-May-2010)
+                            busybox.img is not a block special device.
+                            Proceed anyway? (y,n) y
+                            Filesystem label=
+                            OS type: Linux
+                            Block size=4096 (log=2)
+                            Fragment size=4096 (log=2)
+                            Stride=0 blocks, Stripe width=0 blocks
+                            131072 inodes, 524288 blocks
+                            26214 blocks (5.00%) reserved for the super user
+                            First data block=0
+                            Maximum filesystem blocks=536870912
+                            16 block groups
+                            32768 blocks per group, 32768 fragments per group
+                            8192 inodes per group
+                            Superblock backups stored on blocks: 
+                                    32768, 98304, 163840, 229376, 294912
+
+                            Writing inode tables: done                            
+                            Writing superblocks and filesystem accounting information: done
+
+                            This filesystem will be automatically checked every 36 mounts or
+                            180 days, whichever comes first.  Use tune2fs -c or -i to override.
+                            # du -sh busybox.img 
+                            33M     busybox.img
+
+                            挂载：
+                            # mount -o loop busybox.img /mnt. // mount -o loop 挂载本地回环设备
+                            ]# cd /mnt/
+                            mnt]# ls
+                            lost+found
+
         ```
 
