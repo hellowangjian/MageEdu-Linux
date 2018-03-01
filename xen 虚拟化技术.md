@@ -249,6 +249,7 @@
         * DomU 内核模块
         * 根文件系统
         * swap 设备
+        * 将上述内容定义在 DoumU 的配置文件中
         * 注意：xm 与 xl 启动 DomU 使用的配置文件略有不同；
         * 对于 xl 而言，其创建 DomU 使用的配置指令可通过 `man xl.cfg` 获取
         ```
@@ -285,7 +286,7 @@
                         ro, r：只读
                         rw, w：读写
 
-                        disk = [ "/images/xen/linux.img,raw,xvda,rw", ]
+                        disk = [ "/images/xen/linux.img,raw,xvda,rw","...","..." ]
                 + 使用 qemu-img 管理磁盘映像文件
                     - create [-f fmt] [-o options] filename [size]
                         + 可创建 sparse(稀疏) 格式的磁盘映像文件，是默认格式
