@@ -56,7 +56,29 @@
 - C/S架构：
     + Docker Client: 发起docker相关的请求；
     + Docker Server: 容器运行的节点；
-- dockerfile
-  
+
+
+>    docker(1) 【docker 使用入门（02）】    
+
+- namespace, cgroup
+    + 解决方案：
+        * lxc, openvz
+        * lxc: linux containers
+        * libcontainer
+
+- 核心组件：
+    + docker client：docker的客户端工具，是用户使用docker的主要接口，docker client 与 docker daemon 通信并将结果返回给用户；
+    + docker deamon：运行于宿主机上，Docker守护进程，用户可通过docker client 与其交互；
+    + image：镜像文件是只读的；用来创建container，一个镜像可以运行多个container；镜像文件可以通过 Dockerfile 文件创建，也可以从 docker hub/registry 下载；
+    + repository
+        * 公共仓库：Docker hub/registry
+        * 私有仓库：docker registry
+
+    + docker container：docker的运行实例，容器是一个隔离环境；
+    + 另外两个重要组件：
+        * docker link：
+        * docker volume：
+
+    
 
 
