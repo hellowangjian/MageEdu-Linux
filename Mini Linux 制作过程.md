@@ -251,7 +251,7 @@
     + 手动创建一个跟文件系统：
     ```
         ~]# cd /mnt/sysroot/
-        sysroot]# mkdir -pv etc dev proc sys bin sbin usr/{bin,sbin,lib,lib64} lib64 lib/modules home var/{log,run,lock} tmp mnt media root
+        sysroot]# mkdir -pv etc dev proc sys bin sbin usr/{bin,sbin,lib,lib64} lib64 lib/modules home var/{log,run,lock} tmp mnt media root boot
     ```
     + 复制当前系统的 `bash`
     ```
@@ -376,10 +376,10 @@ BusyBox 可运行于多款 POSIX 环境的操作系统中，如 Linux（包括 A
         ~]# tar xf busybox-1.28.1.tar.bz2 
     ```
     + 创建 `.config` 文件：
-    ```
-        ~]# cd busybox-1.28.1
-        busybox-1.28.1]# make menuconfig
-    ```
+        ```
+            ~]# cd busybox-1.28.1
+            busybox-1.28.1]# make menuconfig
+        ```
         ![busybox_menuconfig.png](images/busybox_menuconfig.png)
 
         * Settings > Build static binary (no shared libs) 不使用共享库编译：
