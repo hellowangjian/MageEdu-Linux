@@ -484,6 +484,8 @@ BusyBox 可运行于多款 POSIX 环境的操作系统中，如 Linux（包括 A
     mdev -s
 
     mount -o remount,rw /dev/sda2 /
+    mkdir /dev/pts
+    mount -t devpts devpts /dev/pts
 
     echo "mounting all filesystems..."
     mount -a
