@@ -336,10 +336,26 @@
                             33M     busybox.img
 
                             挂载：
-                            # mount -o loop busybox.img /mnt. // mount -o loop 挂载本地回环设备
-                            ]# cd /mnt/
+                            # mount -o loop busybox.img /mnt // mount -o loop 挂载本地回环设备
+                            ~]# cd /mnt/
                             mnt]# ls
                             lost+found
 
         ```
 
+    + 示例：
+        * 创建一个pv格式的vm:
+            - 准备磁盘映像文件：
+            ```
+                qemu-img create -f raw -o size=2G /images/xen/busybox.img
+                make2fs -t ext /images/xen/busybox.img
+            ```
+            - 提供根文件系统：
+                + [编译busybox](Mini Linux 制作过程.md)，并复制到busybox.img映像中
+                ```
+
+                ```
+            - 提供配置DomU配置文件
+            - 启动实例：
+                + xl [-v] create <DomU_Config_file> -n
+                + xl create <DomU_Config_file> -c   
