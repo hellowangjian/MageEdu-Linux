@@ -351,11 +351,11 @@
                 make2fs -t ext /images/xen/busybox.img
             ```
             - 提供根文件系统：
-                + [编译busybox](Mini Linux 制作过程.md)，并复制到busybox.img映像中
+                + [编译busybox](https://github.com/hellowangjian/MageEdu-Linux/blob/master/Mini%20Linux%20制作过程.md)，并复制到busybox.img映像中
                 ```
-
+                    busybox 编译方法见 
                 ```
-            - 提供配置DomU配置文件
+            - 提供配置DomU配置文件《Mini Linux 制作过程.md》文件
             - 启动实例：
                 + xl [-v] create <DomU_Config_file> -n
                 + xl create <DomU_Config_file> -c   
