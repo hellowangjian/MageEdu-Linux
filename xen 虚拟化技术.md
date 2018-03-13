@@ -843,3 +843,20 @@ Xen(2)
                 vfb = [ 'vnc=1' ]
                     vnc监听的端口为5900，相应的 DISPLAYNUM 为 0
             ```
+
+- 使用 Dom0 中物理磁盘分区为 DomU 提供存储空间：
+    + 创建一个分区，提供文件系统及配置文件...
+
+- 使用libvirt实现xen虚拟机管理
+
+```
+    # yum install libvirt libvirt-daemon-xen virt-manager python-virtinst libvirt-client -y
+
+    # service libvirtd start
+    Starting libvirtd daemon:                                  [  OK  ]
+
+    virt-manager：图形化管理
+    virt-install：命令行安装系统
+    virsh：统一的命令行管理系统，支持 xen, kvm, qemu
+```
+
