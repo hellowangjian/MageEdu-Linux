@@ -499,6 +499,108 @@ KVM(2)
             monitor接口：
                 migrate tcp:DEST_IP:DEST:PORT
 
+
+补充资料：nat模型网络脚本示例：
+
+    /etc/qemu-natup
+        #!/bin/bash
+        #
+        bridge="isbr"
+        net="10.0.0.0/8"
+        ifaddr=10.0.10.1
+
+        checkbr() {
+            if brctl show | grep -i "^$1"; then
+                return 0
+            else
+                return 1
+            fi
+        }
+
+        initbr() {
+            brctl addbr $bridge
+            ip link set $bridge up
+            ip addr add $ifaddr dev $bridge
+        }
+
+        enable_ip_forward() {
+            sysctl -w net.ipv4.ip_forward=1
+        }
+
+        setup_nat() {
+            checkbr $bridge
+            if [ $? -eq 1 ]; then
+                initbr
+                enable_ip_forward
+                iptables -t nat -A POSTROUTING -s $net ! -d $net -j MASQUERADE
+            fi
+        }
+
+        if [ -n "$1" ]; then
+            setup_nat
+            ip link set $1 up
+            brctl addif $bridge $1
+            exit 0
+        else
+            echo "Error: no interface specified."
+            exit 1
+        fi
+        
+    /etc/qemu-natdown
+        #!/bin/bash
+        #
+        bridge="isbr"
+
+        remove_rule() {
+        iptables -t nat -F
+        }
+
+        isalone_bridge() {
+        if ! brctl show | awk "/^$bridge/{print \$4}" | grep "[^[:space:]]" &> /dev/null; then
+            ip link set $bridge down
+            brctl delbr $bridge
+            remove_rule
+        fi
+        }
+
+        if [ -n "$1" ];then
+            ip link set $1 down
+            brctl delif $bridge $1
+            isalone_bridge
+        exit 0
+        else
+            echo "Error: no interface specified."
+            exit 1
+        fi
+        
+
+    
+补充资料：Qemu监视器
+    图形窗口：ctrl+alt+2, ctrl+alt+1
+    文本（-nographic）: Ctrl+a, c
+    
+    算定义minitor接口的输出位置：-monitor /dev/XXX
+        -monitor  stdio
+        
+    常用命令：
+        help: 显示帮助
+            help info
+        info: 显示系统状态
+            info cpus 
+            info tlb
+        commit：
+        change：
+            change vnc password
+        device_add和device_del:
+        usb_add和usb_del 
+        savevm, loadvm, delvm
+            创建、装载及删除虚拟机快照；
+        migrate, migrate_cancel
+        cpu CPU_index
+        log和logfile：
+        sendkey 
+        system_powerdown, system_reset, system_wakeup
+        q或quit: 退出qemu模拟器，qemu进程会终止            
 ```
 
 （完）
