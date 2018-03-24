@@ -1,5 +1,7 @@
 ## 网络虚拟化技术基础
 
+    第 52 天【网络虚拟化技术基础(03)】
+
 ### 回顾
 ---
 - 半虚拟化：
@@ -108,7 +110,7 @@
 - 虚拟路由器
 
 
-    第 52 天【网络名称空间netns用法详解(04)】
+>   第 52 天【网络名称空间netns用法详解(04)】
 
 - 虚拟化技术：
     + cpu
@@ -272,7 +274,7 @@ Linux Network NameSpace：
 1、创建两个虚拟机；  
 2、创建一个内部网桥（br-in）供两台虚拟使用；  
 3、创建一个外部网桥（br-ex）并且桥接到外部物理网络；  
-4、创建一个网络名称空间（Netns1）开启网络内核转发功能，并为其添加两对二网卡，一对儿链接内部网桥，一对儿链接外部网桥；  
+4、创建一个网络名称空间（Netns1），开启网络内核转发功能，并为其添加两对儿网卡，一对儿链接内部网桥，一对儿链接外部网桥；  
 5、配置虚拟机 IP 地址，要求虚拟机网关为 Netns1 eth0 ，并能够 `ping` 通外部网络。  
 
 注意：网络核心转发功能要在创建网络名称空间之前就要打开，不然创建的网络名称空间将不支持此功能。
@@ -280,3 +282,186 @@ Linux Network NameSpace：
 <div align=center>
 <img src="./images/homework_netns.png" width = "500" height = "500" alt="homework_netns.png" align=center />
 </div>
+
+1、创建网桥：
+```
+    安装 bridge-utils：
+        # yum install bridge-utils -y
+
+    创建 br-in 网桥：
+        # brctl addbr br-in
+        # ip link set br-in up
+
+    创建 br-ex 网桥，并设置桥接网络：
+        # brctl addbr br-ex
+        # ip link set br-ex up 
+        # ip addr del 192.168.2.139/24 dev ens33; ip addr add 192.168.2.139/24 dev br-ex; brctl addif br-ex ens33
+```
+
+2、创建网络名称空间：
+```
+    开启核心路由转发功能：
+        # vim /etc/sysctl.conf
+        net.ipv4.ip_forward = 1
+        # sysctl -p
+        net.ipv4.ip_forward = 1
+
+    创建名称空间 Netns1：
+        # ip netns add Netns1
+        # ip netns list
+        Netns1
+        # ip netns exec Netns1 ifconfig -a
+        lo: flags=8<LOOPBACK>  mtu 65536
+                loop  txqueuelen 1  (Local Loopback)
+                RX packets 0  bytes 0 (0.0 B)
+                RX errors 0  dropped 0  overruns 0  frame 0
+                TX packets 0  bytes 0 (0.0 B)
+                TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+    创建两对儿网卡：
+        # ip link add veth1.1 type veth peer name veth1.2    // Netns1 链接内部网桥使用
+        # ip link set veth1.1 up
+        # ip link set veth1.2 up
+        # brctl addif br-in veth1.1
+        # brctl show
+        bridge name     bridge id               STP enabled     interfaces
+        br-ex           8000.000c29cbdfc0       no              ens33
+        br-in           8000.16cb0c385975       no              veth1.1
+
+        # ip link set veth1.2 netns Netns1 
+        # ip netns exec Netns1 ifconfig -a
+        lo: flags=8<LOOPBACK>  mtu 65536
+                loop  txqueuelen 1  (Local Loopback)
+                RX packets 0  bytes 0 (0.0 B)
+                RX errors 0  dropped 0  overruns 0  frame 0
+                TX packets 0  bytes 0 (0.0 B)
+                TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+        veth1.2: flags=4098<BROADCAST,MULTICAST>  mtu 1500
+                ether c2:21:07:e2:74:b5  txqueuelen 1000  (Ethernet)
+                RX packets 5  bytes 438 (438.0 B)
+                RX errors 0  dropped 0  overruns 0  frame 0
+                TX packets 5  bytes 438 (438.0 B)
+                TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+        # ip netns exec Netns1 ip link set veth1.2 name eth0
+        # ip netns exec Netns1 ifconfig eth0 10.0.1.254 netmask 255.255.255.0 up
+        # ip netns exec Netns1 ifconfig
+        eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+                inet 10.0.1.254  netmask 255.255.255.0  broadcast 10.0.1.255
+                inet6 fe80::c021:7ff:fee2:74b5  prefixlen 64  scopeid 0x20<link>
+                ether c2:21:07:e2:74:b5  txqueuelen 1000  (Ethernet)
+                RX packets 5  bytes 438 (438.0 B)
+                RX errors 0  dropped 0  overruns 0  frame 0
+                TX packets 13  bytes 1086 (1.0 KiB)
+                TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+        # ip link add veth2.1 type veth peer name veth2.2    // Netns1 链接外部网桥使用
+        # ip link set veth2.1 up
+        # ip link set veth2.2 up
+        # brctl addif br-ex veth2.1
+        # brctl show
+        bridge name     bridge id               STP enabled     interfaces
+        br-ex           8000.000c29cbdfc0       no              ens33
+                                                                veth2.1
+
+        # ip link set veth2.2 netns Netns1
+        # ip netns exec Netns1 ip link set veth2.2 name eth1
+        # ip netns exec Netns1 ifconfig eth1 192.168.2.140/24 up
+        # ip netns exec Netns1 ifconfig
+        eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+                inet 10.0.1.254  netmask 255.255.255.0  broadcast 10.0.1.255
+                inet6 fe80::c021:7ff:fee2:74b5  prefixlen 64  scopeid 0x20<link>
+                ether c2:21:07:e2:74:b5  txqueuelen 1000  (Ethernet)
+                RX packets 5  bytes 438 (438.0 B)
+                RX errors 0  dropped 0  overruns 0  frame 0
+                TX packets 13  bytes 1086 (1.0 KiB)
+                TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+        eth1: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+                inet 192.168.2.140  netmask 255.255.255.0  broadcast 192.168.2.255
+                inet6 fe80::508e:a4ff:fedc:67e7  prefixlen 64  scopeid 0x20<link>
+                ether 52:8e:a4:dc:67:e7  txqueuelen 1000  (Ethernet)
+                RX packets 5  bytes 438 (438.0 B)
+                RX errors 0  dropped 0  overruns 0  frame 0
+                TX packets 13  bytes 1086 (1.0 KiB)
+                TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+    Netns1 iptables NAT 设置：
+        # ip netns exec Netns1 iptables -t nat -A POSTROUTING -s 10.0.1.0/24 ! -d 10.0.1.0/24 -o eth1 -j MASQUERADE
+
+        默认路由：
+            # ip netns exec Netns1 route add default gw 192.168.2.2
+```
+
+3、创建两个虚拟机：  
+```
+    镜像文件：
+        # cd /images/kvm/cirros/
+        # cp cirros-0.3.4-x86_64-disk.img vm1.qcow2 
+        # cp cirros-0.3.4-x86_64-disk.img vm2.qcow2
+
+    安装 qemu-kvm：
+        # yum install qemu-kvm -y
+
+    加载 kvm 内核：
+        # modprobe kvm
+        # modprobe kvm-intel
+
+    qemu-kvm 网卡脚本：
+        # vim /etc/qemu-ifup
+        #!/bin/bash
+        #
+        bridge=br-in
+
+        if [ -n "$1" ];then
+            ip link set $1 up
+            sleep 1
+            brctl addif $bridge $1
+            [ $? -eq 0 ] && exit 0 || exit 1
+        else
+            echo "Error: no interface specified."
+            exit 1
+        fi
+
+        # vim /etc/qemu-ifdown
+        #!/bin/bash
+        #
+        bridge=br-in
+
+        if [ -n "$1" ];then
+            brctl delif $bridge $1
+            ip linke set $ down
+            exit 0
+        else
+            echo "Error: no interface specified."
+            exit 1
+        fi
+
+    创建 vm1：
+        # qemu-kvm -m 128 -smp 1 -name "vm1" -drive file=/images/kvm/cirros/vm1.qcow2,if=virtio,media=disk,format=qcow2,cache=writeback -net nic,model=virtio,macaddr=52:54:00:aa:bb:cc -net tap,ifname=vm1.0,script=/etc/qemu-ifup,downscript=/etc/qemu-ifdown -daemonize
+        VNC server running on `::1:5900'
+
+    创建 vm2：
+        # qemu-kvm -m 128 -smp 1 -name "vm2" -drive file=/images/kvm/cirros/vm2.qcow2,if=virtio,media=disk,format=qcow2,cache=writeback -net nic,model=virtio,macaddr=52:54:00:aa:bb:cc -net tap,ifname=vm2.0,script=/etc/qemu-ifup,downscript=/etc/qemu-ifdown -daemonize   
+        VNC server running on `::1:5901'
+
+    给虚拟机配置 ip 地址：
+        vm1：
+            # ifconfig eth0 10.0.1.1 netmask 255.255.255.0 up
+            # route add default gw 10.0.1.254
+            # ping 10.0.1.254
+            # ping 192.168.2.140
+            # ping 192.168.2.2
+            # ping 8.8.8.8
+
+        vm2：
+            # ifconfig eth0 10.0.1.2 netmask 255.255.255.0 up
+            # route add default gw 10.0.1.254
+            # ping 10.0.1.254
+            # ping 192.168.2.140
+            # ping 192.168.2.2
+            # ping 8.8.8.8
+```
+
+（完）
