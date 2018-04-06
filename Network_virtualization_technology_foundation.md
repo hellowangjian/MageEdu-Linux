@@ -265,7 +265,7 @@ Linux Network NameSpace：
 
     # dnsmasq --help
 
-    # ip netns exec r1 dnsmasq --dhcp-range 10.0.1.100,10.0.1.120
+    # ip netns exec r1 dnsmasq --dhcp-range 10.0.1.100,10.0.1.120,86400 -i eth0
 
 ```
 
