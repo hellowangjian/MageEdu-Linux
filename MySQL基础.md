@@ -2045,14 +2045,156 @@ MariaDB [hellodb]> SELECT s.Name, c.Course, sc.Score FROM students AS s, courses
 15 rows in set (0.00 sec)
 ```
 2、显示其成绩高于80的同学的名称及课程；<br>
+```
+MariaDB [hellodb]> SELECT s.Name, c.Course, sc.Score FROM students AS s, courses AS c, scores AS sc WHERE s.StuID = sc.StuID AND sc.CourseID = c.CourseID AND sc.Score > 80;
++-------------+----------------+-------+
+| Name        | Course         | Score |
++-------------+----------------+-------+
+| Shi Zhongyu | Weituo Zhang   |    93 |
+| Shi Potian  | Daiyu Zanghua  |    97 |
+| Xie Yanke   | Kuihua Baodian |    88 |
+| Ding Dian   | Kuihua Baodian |    89 |
+| Shi Qing    | Hamo Gong      |    96 |
+| Xi Ren      | Hamo Gong      |    86 |
+| Xi Ren      | Dagou Bangfa   |    83 |
+| Lin Daiyu   | Jinshe Jianfa  |    93 |
++-------------+----------------+-------+
+8 rows in set (0.00 sec)
+```
 3、求前8位同学每位同学自己两门课的平均成绩，并按降序排列；<br>
+```
+MariaDB [hellodb]> SELECT avg(sc.score) AS Ascore,s.StuID,s.Name FROM students AS s, scores AS sc WHERE s.StuID = sc.StuID GROUP BY s.StuID ORDER BY Ascore DESC LIMIT 8;
++---------+-------+-------------+
+| Ascore  | StuID | Name        |
++---------+-------+-------------+
+| 96.0000 |     6 | Shi Qing    |
+| 85.0000 |     1 | Shi Zhongyu |
+| 84.5000 |     7 | Xi Ren      |
+| 81.5000 |     3 | Xie Yanke   |
+| 80.0000 |     4 | Ding Dian   |
+| 75.0000 |     8 | Lin Daiyu   |
+| 72.0000 |     2 | Shi Potian  |
+| 51.0000 |     5 | Yu Yutong   |
++---------+-------+-------------+
+8 rows in set (0.00 sec)
+```
 4、显示每门课程名称及学习了这门课程的同学的个数；<br>
+```
+MariaDB [hellodb]> SELECT count(s.Name), c.Course FROM students AS s, courses AS c, scores AS sc WHERE s.StuID = sc.StuID AND sc.CourseID = c.CourseID GROUP BY c.Course ORDER BY count(s.Name);     
++---------------+----------------+
+| count(s.Name) | Course         |
++---------------+----------------+
+|             1 | Taiji Quan     |
+|             1 | Jinshe Jianfa  |
+|             2 | Dagou Bangfa   |
+|             2 | Weituo Zhang   |
+|             2 | Daiyu Zanghua  |
+|             3 | Hamo Gong      |
+|             4 | Kuihua Baodian |
++---------------+----------------+
+7 rows in set (0.00 sec)
+```
 
 **思考：**<br>
 1、如何显示其年龄大于平均年龄的同学的名字？<br>
+使用子查询返回平均年龄做为查询条件：
+```
+先查询出平均年龄：
+MariaDB [hellodb]> SELECT avg(Age) FROM students;
++----------+
+| avg(Age) |
++----------+
+|  32.7037 |
++----------+
+1 row in set (0.00 sec)
+
+在将平均年龄做为查询条件：
+MariaDB [hellodb]> SELECT Name, Age FROM students WHERE Age > (SELECT avg(Age) FROM students); 
++--------------+-----+
+| Name         | Age |
++--------------+-----+
+| Tian Boguang |  33 |
+| Shi Qing     |  46 |
+| Xie Yanke    |  53 |
+| Yinjiao King |  98 |
+| Sun Dasheng  | 100 |
+| Jinjiao King | 100 |
++--------------+-----+
+6 rows in set (0.00 sec)
+```
+
 2、如何显示其学习的课程为第1、2、4或第7门课的同学的名字？<br>
-3、如何显示其成员数量最少位3个的班级的同学中年龄大于同班同学平均年龄的同学？<br>
+查询出 scores 表中学习此课程的 StuID 返回给查询 students 表做为查询条件：
+```
+子查询方式：
+MariaDB [hellodb]> SELECT StuID, Name FROM students WHERE StuID IN (SELECT  StuID FROM scores WHERE CourseID IN (1,2,4,7));
++-------+-------------+
+| StuID | Name        |
++-------+-------------+
+|     1 | Shi Zhongyu |
+|     2 | Shi Potian  |
+|     3 | Xie Yanke   |
+|     4 | Ding Dian   |
+|     5 | Yu Yutong   |
+|     6 | Shi Qing    |
+|     7 | Xi Ren      |
+|     8 | Lin Daiyu   |
++-------+-------------+
+8 rows in set (0.00 sec)
+
+不等值连接方式：
+MariaDB [hellodb]> SELECT DISTINCT s.StuID,s.Name FROM students AS s, scores AS sc WHERE s.StuID = sc.StuID AND sc.CourseID IN (1,2,4,7);
++-------+-------------+
+| StuID | Name        |
++-------+-------------+
+|     1 | Shi Zhongyu |
+|     2 | Shi Potian  |
+|     3 | Xie Yanke   |
+|     4 | Ding Dian   |
+|     5 | Yu Yutong   |
+|     6 | Shi Qing    |
+|     7 | Xi Ren      |
+|     8 | Lin Daiyu   |
++-------+-------------+
+8 rows in set (0.00 sec)
+```
+3、如何显示其成员数量少于3个的班级的同学中年龄大于同班同学平均年龄的同学？<br>
+先查询出成员数量少于3的班级同学的班级及平均成绩，再连接 students 表进行条件过滤：
+```
+MariaDB [hellodb]> SELECT s.StuID,s.Name,s.Age FROM students AS s,(SELECT avg(Age) AS AAge,count(StuID) AS StuNum,ClassID FROM students GROUP BY ClassID HAVING StuNum > 3) AS sc WHERE s.ClassID = sc.ClassID AND s.Age > sc.AAge;
++-------+---------------+-----+
+| StuID | Name          | Age |
++-------+---------------+-----+
+|     2 | Shi Potian    |  22 |
+|     4 | Ding Dian     |  32 |
+|     5 | Yu Yutong     |  26 |
+|    11 | Yuan Chengzhi |  23 |
+|    16 | Xu Zhu        |  21 |
+|    17 | Lin Chong     |  25 |
+|    21 | Huang Yueying |  22 |
++-------+---------------+-----+
+7 rows in set (0.00 sec)
+```
+
 4、统计各班级中年龄大于全校同学平均年龄的同学？<br>
+类似第一题：
+```
+MariaDB [hellodb]> SELECT s.Name,s.Age,s.ClassID FROM students AS s WHERE s.Age > (SELECT avg(Age) FROM students);
++--------------+-----+---------+
+| Name         | Age | ClassID |
++--------------+-----+---------+
+| Tian Boguang |  33 |       2 |
+| Shi Qing     |  46 |       5 |
+| Xie Yanke    |  53 |       2 |
+| Yinjiao King |  98 |    NULL |
+| Sun Dasheng  | 100 |    NULL |
+| Jinjiao King | 100 |    NULL |
++--------------+-----+---------+
+6 rows in set (0.00 sec)
+```
+
 
 [mariadb vs mysql]: https://mariadb.com/kb/en/library/mariadb-vs-mysql-features/
 [通用二进制格式安装]: https://mariadb.com/kb/en/library/installing-mariadb-binary-tarballs/
+
+（完）
