@@ -111,7 +111,7 @@ YAML文件扩展名通常为.yaml，如example.yaml。
 
 4.2.2 dictionary
 
-字典通过key与valuef进行标识，例如：
+字典通过key与value进行标识，例如：
 ---
 # An employee record
 name: Example Developer

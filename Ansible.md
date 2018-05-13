@@ -1,7 +1,7 @@
 ## Ansible
 ---
 
-    第 33 天 【ansible核心组件、特性、安装部署（02）】
+    第 33 天 【ansible入门（02）】
 
 运维工作：系统安装（物理机、虚拟机）--> 程序包安装、配置、服务启动 --> 批量操作 --> 程序发布 --> 监控
 
@@ -190,8 +190,7 @@
                                        to `no'.
 ```
 
->   第 33 天 【ansible常用模块详解、基础应用（03）】
-
+>   第 33 天 【ansilbe常用模块详解(03)-2】
 
 - ansible
 ```
@@ -205,10 +204,12 @@
             -a 'COMMAND'
 
         user:
-            -a 'name= state={present|absent} system='
+            -a 'name= state={present|absent} system= uid='
+
+            # ansible webserver -m user -a 'name=hacluster state=present'
 
         group:
-            -a 'name= gid= state= system='
+            -a 'name= gid= state={present|absent} system='
 
         cron:
             -a 'name= minute= hour= day= month= weekday= job= user= state='
@@ -318,6 +319,8 @@
         shell：Execute commands in nodes.
             -a 'COMMAND'
 
+            # ansible webserver -m shell -a 'echo centos | passwd --stdin centos'
+
         script：Runs a local script on a remote node after transferring it
             -a '/path/to/script'
 
@@ -351,9 +354,18 @@
 - playbook的核心元素：
     + tasks：任务
     + variables：变量
-        * facts
-        * --extra-vars "name=value name=value"
-        * role定义
+        * facts：`ansible HOST -m steup`
+        * 通过命令行传递变量：
+        ```
+            ansible-playbook test.yml --extra-vars "name=value name=value"
+        ```
+        * role定义：
+        ```
+                - hosts: webservers
+                  roles:
+                    - common
+                    - { role: foo_app_instance, dir: '/web/htdocs/a.com',  port: 8080 }
+        ```
         * Inventory中的变量：
             - 主机变量：hostname name=value name=value
             - 组变量：
