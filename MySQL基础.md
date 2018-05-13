@@ -1967,7 +1967,7 @@ Syntax:
     31 rows in set (0.00 sec)
 ```
 
-**练习：**导入hellodb.sql，以下操作在students表上执行<br>
+**练习：** 导入hellodb.sql，以下操作在students表上执行<br>
 1、以ClassID分组，显示每班的同学的人数；<br>
 ```
 MariaDB [hellodb]> SELECT count(StuID),ClassID FROM students GROUP BY ClassID;
@@ -2019,7 +2019,7 @@ MariaDB [hellodb]> SELECT sum(Age),Gender FROM students WHERE Age > 25 GROUP BY 
 1 row in set (0.00 sec)
 ```
 
-**练习：**导入hellodb.sql，完成以下题目：
+**练习：** 导入hellodb.sql，完成以下题目：
 1、显示前5位同学的姓名、课程及成绩；<br>
 ```
 MariaDB [hellodb]> SELECT s.Name, c.Course, sc.Score FROM students AS s, courses AS c, scores AS sc WHERE s.StuID = sc.StuID AND sc.CourseID = c.CourseID;         
