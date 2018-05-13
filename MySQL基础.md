@@ -872,7 +872,7 @@
             mysql> SHOW [SESSION] STATUS;
         ```
 
-    第 39 天 【MySQL基础（02）】
+>   第 39 天 【MySQL基础（02）】
 
 - SQL：ANSI SQL 标准
     + SQL-86, SQL-89, SQL-92, SQL-99, SQL-03
@@ -1561,7 +1561,7 @@ Syntax:
     1 row in set (0.00 sec)
 ```
 
-- ORDER BYL：根据指定的字段对查询结果进行排序；
+- ORDER BY：根据指定的字段对查询结果进行排序；
     + 升序：ASC
     + 降序：DESC
 ```
@@ -1623,7 +1623,7 @@ Syntax:
     + LOCK IN SHARE MODE：读锁，共享锁；
 
 
-**练习：**导入hellodb.sql生成数据库<br>
+**练习：** 导入hellodb.sql生成数据库<br>
 (1) 在 students 表中，查询年龄大于 25 岁，且为男性的同学的名字和年龄；<br>
 ```
     MariaDB [hellodb]> SELECT Name, Age, Gender FROM students WHERE Gender='M' AND Age > 25;
@@ -2019,7 +2019,7 @@ MariaDB [hellodb]> SELECT sum(Age),Gender FROM students WHERE Age > 25 GROUP BY 
 1 row in set (0.00 sec)
 ```
 
-**练习：** 导入hellodb.sql，完成以下题目：
+**练习：** 导入hellodb.sql，完成以下题目：<br>
 1、显示前5位同学的姓名、课程及成绩；<br>
 ```
 MariaDB [hellodb]> SELECT s.Name, c.Course, sc.Score FROM students AS s, courses AS c, scores AS sc WHERE s.StuID = sc.StuID AND sc.CourseID = c.CourseID;         
