@@ -367,7 +367,7 @@
                     - { role: foo_app_instance, dir: '/web/htdocs/a.com',  port: 8080 }
         ```
         * Inventory中的变量：
-            - 主机变量：hostname name=value name=value
+            - 主机变量：`hostname name=value name=value`
             - 组变量：
             ```
                 [groupname:vars]
@@ -380,6 +380,7 @@
 
 - Inventory的高级用法：
 ```
+    5.2.1 inventory文件格式
     inventory文件遵循INI文件风格，中括号中的字符为组名。可以将同一个主机同时归并到多个不同的组中；此外，当如若目标主机使用了非默认的SSH端口，还可以在主机名称之后使用冒号加端口号来标明。
 
         ntp.magedu.com
@@ -441,6 +442,9 @@
     ntp_server=ntp.magedu.com
 
     5.2.5 inventory参数
+
+        [websrvs]
+        172.16.100.68 ansible_ssh_port=2222 ansible_ssp_user=centos ansible_ssh_pass=PASSWORD
 
     ansible基于ssh连接inventory中指定的远程主机时，还可以通过参数指定其交互方式；这些参数如下所示：
 
