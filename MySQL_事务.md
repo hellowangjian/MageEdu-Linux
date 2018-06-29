@@ -15,7 +15,7 @@
     + I：Isolation，隔离性：一个事务所做出的操作在提交之前，是不能为其它所见；隔离有多种隔离级别；
     + D：durability，持久性：一旦事务提交，其所做的修改会永久保存于数据库中；
 
-** Transaction life cycle: **
+**Transaction life cycle:**
 
 <img src="images/mysql_transcation_lifecycle.png" height="300" width="300">
 
@@ -23,7 +23,7 @@
 结束事务：（1）COMMIT：提交，（2）ROLLBACK：回滚；<br>
 注意：只有事务型存储引擎方能支持此类操作；
 
-** autocommit: **
+**autocommit:**
 
 MySQL默认操作模式就是autocommit自动提交模式。这就表示除非显式地开始一个事务，否则每个查询都被当做一个单独的事务自动执行。我们可以通过设置autocommit的值改变是否是自动提交autocommit模式。
 ```
@@ -43,7 +43,7 @@ MariaDB [hellodb]> set autocommit = 0;
 
 建议显示请求和提交事务，而不是要使用“自动提交”的功能；
 
-** 事务支持savepoint：**
+**事务支持savepoint**
 
 ```
 Syntax:
@@ -95,11 +95,11 @@ SERIALIZABILE（可串行化）：锁数据；
 
 MVCC：多版本并发控制
 
-** 死锁： **
+**死锁**
 
 两个或多个事务在一组资源相互占用，并请求锁定对方占用的资源的状态；
 
-** 事务日志 ** 
+**事务日志** 
 
 事务日志的写入类型为“追加”，因此其操作为“顺序IO”；此日志通常也被称为“预写式日志（write ahead logging）”；
 ```
