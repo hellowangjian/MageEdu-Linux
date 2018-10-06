@@ -114,8 +114,11 @@
 
         rows：MySQL估计为找到所有的目标行而需要读取的行数；
 
-
-
+        Extra：额外信息
+            Using index：MySQL将会使用覆盖索引，以避免访问表；
+            Using where：MySQL服务器将在存储引擎检索后，再进行一次过滤；
+            Using temporary：MySQL对结果排序时会使用临时表；
+            Using filesort：MySQL对结果使用一个外部索引排序；
 
 ```
 

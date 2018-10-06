@@ -176,7 +176,7 @@ MariaDB [(none)]> SHOW BINLOG EVENTS IN 'mysql-bin.000004' FROM 4 LIMIT 1;
 ```
 sql_log_bin=ON|OFF：是否记录二进制日志；
 log_bin=/PATH/TO/LOGFILENAME：记录二进制日志的路径及文件名，是否记录二进制日志，通常为ON；
-binlog_format=STATEMENT|ROM|MIXED：二进制日志记录的格式；
+binlog_format=STATEMENT|ROW|MIXED：二进制日志记录的格式；
 max_binlog_size=1073741824：单个二进制日志文件的最大体积，默认为1G；
     注意：（1）到达最大值会自动滚动；（2）文件达到上限时的大小未必为指定的精确值；
 sync_binlog=1|0：设定是否启动二进制日志同步功能；
