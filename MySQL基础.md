@@ -752,7 +752,7 @@
     配置文件：集中式的配置，能够为mysql的各应用程序提供配置信息；
         [mysqld]：mysql服务器端程序专用配置信息；
         [mysqld_safe]：线程安全的mysql专用配置信息；
-        [mysqld_multi]：多实力模型共享的配置信息；
+        [mysqld_multi]：多实例模型共享的配置信息；
         [server]：服务器端程序运行都有效；
         [mysql]：专用于mysql客户端程序配置信息；
         [mysqldump]：专用于mysqldump备份导入导出配置信息；
@@ -765,7 +765,9 @@
             skip_name_resolve
 
         配置文件查找路径：
-            /etc/my.cnf --> /etc/mysql/my.cnf --> $MYSQL_HOME/my.cnf --> default-extra-file=/PATH/TO/SOMEDIR/my.cnf --> ~/.my.cnf`
+            /etc/my.cnf --> /etc/mysql/my.cnf --> $MYSQL_HOME/my.cnf --> --default-extra-file=/PATH/TO/SOMEDIR/my.cnf --> ~/.my.cnf
+
+            按顺序依次查找，如果前后两个文件中配置的参数相同，以后找到的配置参数为准。
 
     安装方式：
         os vendor：rpm
@@ -782,7 +784,7 @@
 
                 mysql> update musql.user SET password=PASSWORD('your_password') WHERE cluase;
 
-                # mysqladmin
+                # mysqladmin -uUSERNAME -p password('your_password')
 
             (2) 删除所有匿名用户；
                 mysql> DROP USER 'username'@'host';
@@ -824,7 +826,7 @@
     + `-p, --password=`：指定密码，默认无密码；
     + `-P, --port=`：指定连接服务器的端口；
     + `--protocol={TCP|SOCKET|PIPE|MEMORY}`：指定连接时使用的协议，一般为 tcp；
-    + `-S, --socket=`：指定连接时使用的套接字文件路径，host 为 localhost 或 127.0.0.1 时使用；
+    + `-S, --socket=`：指定连接时使用的套接字文件路径，`--host` 为 localhost 或 127.0.0.1 时使用；
     + `-D, --database=`：指定连接后使用的数据库名称；
     + `-C, --compress`：传输数据时是否压缩；
     + `mysql -e "SQL"`：不进入交互模式执行SQL语句；
@@ -1004,6 +1006,7 @@
 sql_mode：定义mysqld对约束等的响应行为；
 
 修改方式：  
+
 ```
     MariaDB [testdb]> show variables like "sql_mode";
     +---------------+-------+
@@ -1032,6 +1035,7 @@ sql_mode：定义mysqld对约束等的响应行为；
 ## SQL：DDL, DML
 
 DDL：数据定义语言，定义数据库组件，比如：数据库，表，索引，用户，试图，存储过程，存储函数等等；
+
 ```    
     CREATE, ALTER, DROP 
 
@@ -1066,6 +1070,7 @@ DML：数据操作语言；
 ```
 
 表：二维关系
+
 ```
     设计表：遵循规范；
 
@@ -1148,6 +1153,7 @@ DML：数据操作语言；
     + 重做日志、撤销日志、二进制日志、错误日志、查询日志、慢查询日志、中继日志
 
 ### 索引管理：
+
 索引是按特定数据结构存储的数据；
 
 - 索引类型：
@@ -1157,7 +1163,7 @@ DML：数据操作语言；
     + B+ TREE、HASH、R TREE；
     + 简单索引、组合索引；
     + 左前缀索引；
-    + 覆盖索引；
+    + 覆盖索引：索引即是数据；
 
 - 管理索引的途径：
     + 创建索引：创建表时指定；
@@ -1223,6 +1229,7 @@ DML：数据操作语言；
     ```
 
 - EXPLAIN：
+
 ```
 MariaDB [hellodb]> explain select * from students where Name like "X%"\G 
 *************************** 1. row ***************************
@@ -1297,6 +1304,7 @@ Syntax:
 #### INSERT：
 
 一次插入一行或多行数据；
+
 ```
 Syntax:
     INSERT [LOW_PRIORITY | DELAYED | HIGH_PRIORITY] [IGNORE]
@@ -1378,11 +1386,13 @@ Execution path of a query：
 查询执行路径中的组件：查询缓存、解析器、预处理器、优化器、查询执行引擎、存储引擎；
 
 SELECT语句的执行流程： 
+
 ``` 
     FROM Clause --> WHERE Clause --> GROUP BY --> HAVING Clause --> ORDER BY --> SELECT --> LIMIT
 ```
 
 - 单表查询：
+
 ```
 Syntax:
     SELECT
@@ -1461,6 +1471,7 @@ Syntax:
 ```
 
 - WHERE 子句：指明过滤条件以实现“选择”的功能；选择；
+
 ```
     过滤条件：布尔型表达式；
 
@@ -1539,6 +1550,7 @@ Syntax:
 ```
 
 - GROUP：根据指定的条件把查询结果进行“分组”以用于做“聚合”运算；
+
 ```
     avg(), max(), min(), count(), sum() 
 
@@ -1564,6 +1576,7 @@ Syntax:
 - ORDER BY：根据指定的字段对查询结果进行排序；
     + 升序：ASC
     + 降序：DESC
+
 ```
     MariaDB [hellodb]> SELECT count(StuID) as StuCount, ClassID FROM students GROUP BY ClassID ORDER BY StuCount; 
     +----------+---------+
@@ -1582,6 +1595,7 @@ Syntax:
 ```
 
 - LIMIT [[offset,]row_count]：对查询的结果进行输出行数限制；
+
 ```
     MariaDB [hellodb]> SELECT Name,Age FROM students ORDER BY Age DESC LIMIT 10;
     +--------------+-----+
@@ -1624,7 +1638,9 @@ Syntax:
 
 
 **练习：** 导入hellodb.sql生成数据库<br>
+
 (1) 在 students 表中，查询年龄大于 25 岁，且为男性的同学的名字和年龄；<br>
+
 ```
     MariaDB [hellodb]> SELECT Name, Age, Gender FROM students WHERE Gender='M' AND Age > 25;
     +--------------+-----+--------+
@@ -1644,6 +1660,7 @@ Syntax:
 ```
 
 (2) 以 ClassID 为分组依据，显示每组的平均年龄；<br>
+
 ```
     MariaDB [hellodb]> SELECT avg(Age) as AAge, ClassID FROM students GROUP BY ClassID;
     +---------+---------+
@@ -1662,6 +1679,7 @@ Syntax:
 ```
 
 (3) 显示第 2 题中平均年龄大于 30 的分组即平均年龄；<br>
+
 ```
     MariaDB [hellodb]> SELECT avg(Age) as AAge, ClassID FROM students GROUP BY ClassID HAVING AAge > 30;
     +---------+---------+
@@ -1675,6 +1693,7 @@ Syntax:
 ```
 
 (4) 显示以 L 开头的名字的同学的信息；<br>
+
 ```
     MariaDB [hellodb]> SELECT * FROM students WHERE Name LIKE 'L%';
     +-------+-------------+-----+--------+---------+-----------+
@@ -1688,6 +1707,7 @@ Syntax:
 ```
 
 (5) 显示 TeacherID 非空的同学的相关信息；<br>
+
 ```
     MariaDB [hellodb]> SELECT * FROM students WHERE TeacherID IS NOT NULL;
     +-------+-------------+-----+--------+---------+-----------+
@@ -1703,6 +1723,7 @@ Syntax:
 ```
 
 (6) 以年龄排序后，显示年龄最大的前 10 位同学的信息；<br>
+
 ```
     MariaDB [hellodb]> SELECT * FROM students ORDER BY Age DESC LIMIT 10; 
     +-------+--------------+-----+--------+---------+-----------+
@@ -1723,6 +1744,7 @@ Syntax:
 ```
 
 (7) 查询年龄大于等于20岁，小于等于 25 岁的同学的信息，用三种方法；
+
 ```
 第一种：
     MariaDB [hellodb]> SELECT * FROM students WHERE Age >=20 AND Age <=25;
@@ -1927,6 +1949,7 @@ Syntax:
             ```
 
 - 联合查询：UNION，字段数值类型要一致
+
 ```
     MariaDB [hellodb]> SELECT Name,Age FROM students UNION SELECT Name,Age FROM teachers;
     +---------------+-----+
@@ -1968,7 +1991,9 @@ Syntax:
 ```
 
 **练习：** 导入hellodb.sql，以下操作在students表上执行<br>
+
 1、以ClassID分组，显示每班的同学的人数；<br>
+
 ```
 MariaDB [hellodb]> SELECT count(StuID),ClassID FROM students GROUP BY ClassID;
 +--------------+---------+
@@ -1985,7 +2010,9 @@ MariaDB [hellodb]> SELECT count(StuID),ClassID FROM students GROUP BY ClassID;
 +--------------+---------+
 8 rows in set (0.00 sec)
 ```
+
 2、以Gender分组，显示其年龄之和；<br>
+
 ```
 MariaDB [hellodb]> SELECT sum(Age),Gender FROM students GROUP BY Gender;  
 +----------+--------+
@@ -1996,7 +2023,9 @@ MariaDB [hellodb]> SELECT sum(Age),Gender FROM students GROUP BY Gender;
 +----------+--------+
 2 rows in set (0.00 sec)
 ```
+
 3、以ClassID分组，显示其平均年龄大于25的班级；<br>
+
 ```
 MariaDB [hellodb]> SELECT avg(Age) AS AAge,ClassID FROM students GROUP BY ClassID HAVING AAge > 25;
 +---------+---------+
@@ -2008,7 +2037,9 @@ MariaDB [hellodb]> SELECT avg(Age) AS AAge,ClassID FROM students GROUP BY ClassI
 +---------+---------+
 3 rows in set (0.00 sec)
 ```
+
 4、以Gender分组，显示各组中年龄大于25的学员的年龄之和；<br>
+
 ```
 MariaDB [hellodb]> SELECT sum(Age),Gender FROM students WHERE Age > 25 GROUP BY Gender;
 +----------+--------+
@@ -2020,7 +2051,9 @@ MariaDB [hellodb]> SELECT sum(Age),Gender FROM students WHERE Age > 25 GROUP BY 
 ```
 
 **练习：** 导入hellodb.sql，完成以下题目：<br>
+
 1、显示前5位同学的姓名、课程及成绩；<br>
+
 ```
 MariaDB [hellodb]> SELECT s.Name, c.Course, sc.Score FROM students AS s, courses AS c, scores AS sc WHERE s.StuID = sc.StuID AND sc.CourseID = c.CourseID;         
 +-------------+----------------+-------+
@@ -2044,7 +2077,9 @@ MariaDB [hellodb]> SELECT s.Name, c.Course, sc.Score FROM students AS s, courses
 +-------------+----------------+-------+
 15 rows in set (0.00 sec)
 ```
+
 2、显示其成绩高于80的同学的名称及课程；<br>
+
 ```
 MariaDB [hellodb]> SELECT s.Name, c.Course, sc.Score FROM students AS s, courses AS c, scores AS sc WHERE s.StuID = sc.StuID AND sc.CourseID = c.CourseID AND sc.Score > 80;
 +-------------+----------------+-------+
@@ -2061,7 +2096,9 @@ MariaDB [hellodb]> SELECT s.Name, c.Course, sc.Score FROM students AS s, courses
 +-------------+----------------+-------+
 8 rows in set (0.00 sec)
 ```
+
 3、求前8位同学每位同学自己两门课的平均成绩，并按降序排列；<br>
+
 ```
 MariaDB [hellodb]> SELECT avg(sc.score) AS Ascore,s.StuID,s.Name FROM students AS s, scores AS sc WHERE s.StuID = sc.StuID GROUP BY s.StuID ORDER BY Ascore DESC LIMIT 8;
 +---------+-------+-------------+
@@ -2078,7 +2115,9 @@ MariaDB [hellodb]> SELECT avg(sc.score) AS Ascore,s.StuID,s.Name FROM students A
 +---------+-------+-------------+
 8 rows in set (0.00 sec)
 ```
+
 4、显示每门课程名称及学习了这门课程的同学的个数；<br>
+
 ```
 MariaDB [hellodb]> SELECT count(s.Name), c.Course FROM students AS s, courses AS c, scores AS sc WHERE s.StuID = sc.StuID AND sc.CourseID = c.CourseID GROUP BY c.Course ORDER BY count(s.Name);     
 +---------------+----------------+
@@ -2096,8 +2135,11 @@ MariaDB [hellodb]> SELECT count(s.Name), c.Course FROM students AS s, courses AS
 ```
 
 **思考：**<br>
+
 1、如何显示其年龄大于平均年龄的同学的名字？<br>
+
 使用子查询返回平均年龄做为查询条件：
+
 ```
 先查询出平均年龄：
 MariaDB [hellodb]> SELECT avg(Age) FROM students;
@@ -2124,7 +2166,9 @@ MariaDB [hellodb]> SELECT Name, Age FROM students WHERE Age > (SELECT avg(Age) F
 ```
 
 2、如何显示其学习的课程为第1、2、4或第7门课的同学的名字？<br>
+
 查询出 scores 表中学习此课程的 StuID 返回给查询 students 表做为查询条件：
+
 ```
 子查询方式：
 MariaDB [hellodb]> SELECT StuID, Name FROM students WHERE StuID IN (SELECT  StuID FROM scores WHERE CourseID IN (1,2,4,7));
@@ -2158,8 +2202,11 @@ MariaDB [hellodb]> SELECT DISTINCT s.StuID,s.Name FROM students AS s, scores AS 
 +-------+-------------+
 8 rows in set (0.00 sec)
 ```
+
 3、如何显示其成员数量少于3个的班级的同学中年龄大于同班同学平均年龄的同学？<br>
+
 先查询出成员数量少于3的班级同学的班级及平均成绩，再连接 students 表进行条件过滤：
+
 ```
 MariaDB [hellodb]> SELECT s.StuID,s.Name,s.Age FROM students AS s,(SELECT avg(Age) AS AAge,count(StuID) AS StuNum,ClassID FROM students GROUP BY ClassID HAVING StuNum > 3) AS sc WHERE s.ClassID = sc.ClassID AND s.Age > sc.AAge;
 +-------+---------------+-----+
@@ -2177,7 +2224,9 @@ MariaDB [hellodb]> SELECT s.StuID,s.Name,s.Age FROM students AS s,(SELECT avg(Ag
 ```
 
 4、统计各班级中年龄大于全校同学平均年龄的同学？<br>
+
 类似第一题：
+
 ```
 MariaDB [hellodb]> SELECT s.Name,s.Age,s.ClassID FROM students AS s WHERE s.Age > (SELECT avg(Age) FROM students);
 +--------------+-----+---------+

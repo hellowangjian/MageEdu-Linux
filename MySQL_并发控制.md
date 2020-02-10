@@ -1,3 +1,5 @@
+    第 40 天 【MariaDB存储引擎及编译安装(03)】
+
 ## MySQL 并发控制
 
 ### 锁
@@ -49,3 +51,5 @@
 第三种方式马哥没有讲清楚，其需要事务的支持，MyISAM 是不支持事务的，需要进一步说明。
 
 `SELECT caluse FROM tbl_name FOR UPDATE`的具体使用方法及使用场景建议参考：<https://my.oschina.net/u/347414/blog/736256>
+
+（完）
