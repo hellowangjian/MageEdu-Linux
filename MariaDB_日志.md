@@ -31,6 +31,7 @@
 记录执行时长超出指定时长的查询操作。默认 MariaDB 没有启用此功能。
 
 查看当前系统设置的时长：
+
 ```
 MariaDB [(none)]> SHOW GLOBAL VARIABLES LIKE 'long_query_time';
 +-----------------+-----------+
@@ -50,11 +51,13 @@ MariaDB [(none)]> SELECT @@GLOBAL.long_query_time;
 ```
 
 修改当前系统设置的慢查询时长：
+
 ```
 SET GLOBAL long_query_time = 
 ```
 
 相关变量参数设置：
+
 ```
 slow_query_log=ON|OFF：是否启用慢查询日志；
 slow_query_log_file=HOSTNAME-slow.log：日志文件；
@@ -90,6 +93,7 @@ MariaDB [(none)]> SHOW GLOBAL VARIABLES WHERE Variable_name IN ('slow_query_log'
 4、在主从复制架构中的从服务器上启动从服务器线程时产生的日志信息；
 
 相关变量参数设置：
+
 ```
 log_error=/PATH/TO/LOG_ERROR_FILE：错误日志文件；
 log_warnings=0|1：是否记录警告信息至错误日志文件中，1表示记录，0表示不记录
@@ -111,6 +115,7 @@ MariaDB [(none)]> SHOW GLOBAL VARIABLES WHERE Variable_name IN ('log_error','log
 功能：用于通过“重放”日志文件中的事件来生成数据副本；
 
 `SHOW {BINARY | MASTER} LOGS`：查看mariadb自行管理使用中的二进制日志文件列表；
+
 ```
 MariaDB [(none)]> SHOW BINARY LOGS;
 +------------------+-----------+
@@ -136,6 +141,7 @@ MariaDB [(none)]> SHOW MASTER LOGS;
 ```
 
 `SHOW MASTER STATUS`：查看正在使用中的二进制日志文件；
+
 ```
 MariaDB [(none)]> SHOW MASTER STATUS;
 +------------------+----------+--------------+------------------+
@@ -157,7 +163,7 @@ MariaDB [(none)]> SHOW BINLOG EVENTS IN 'mysql-bin.000004' FROM 4 LIMIT 1;
 1 row in set (0.00 sec)
 ```
 
-** 二进制日志记录格式：**
+**二进制日志记录格式：**
 
 1、基于“语句”记录：statement
 
@@ -165,13 +171,13 @@ MariaDB [(none)]> SHOW BINLOG EVENTS IN 'mysql-bin.000004' FROM 4 LIMIT 1;
 
 3、混合模式：mixed，让系统自行判断应该基于上面哪种方式进行；
 
-** 二进制日志文件的构成：**
+**二进制日志文件的构成：**
 
 - 两类文件：
     + 日志文件：mysql-bin.文件名后缀，二进制格式；
-    + 索引文件：mysql-bin.index，文本格式；
+    + 索引文件：mysql-bin.index，文本格式；记录当前使用中的binlog文件名；
 
-** 服务器变量：**
+**服务器变量：**
 
 ```
 sql_log_bin=ON|OFF：是否记录二进制日志；
@@ -179,7 +185,7 @@ log_bin=/PATH/TO/LOGFILENAME：记录二进制日志的路径及文件名，是�
 binlog_format=STATEMENT|ROW|MIXED：二进制日志记录的格式；
 max_binlog_size=1073741824：单个二进制日志文件的最大体积，默认为1G；
     注意：（1）到达最大值会自动滚动；（2）文件达到上限时的大小未必为指定的精确值；
-sync_binlog=1|0：设定是否启动二进制日志同步功能；
+sync_binlog=1|0：设定是否启用二进制日志同步至磁盘文件功能，commit触发同步；
 
 MariaDB [(none)]> SHOW VARIABLES WHERE Variable_name IN ('sql_log_bin','log_bin','binlog_format','max_binlog_size','sync_binlog');
 +-----------------+------------+
@@ -194,7 +200,7 @@ MariaDB [(none)]> SHOW VARIABLES WHERE Variable_name IN ('sql_log_bin','log_bin'
 5 rows in set (0.00 sec)
 ```
 
-** `mysqlbinlog`：客户端命令工具 **
+**`mysqlbinlog`：客户端命令工具**
 
 基于 mysql 协议链接至服务器端读取 mysql binlog 日志，也可查询本地 binglog 日志。
 
@@ -244,7 +250,7 @@ ROLLBACK /* added by mysqlbinlog */;
 /*!50530 SET @@SESSION.PSEUDO_SLAVE_MODE=0*/;
 ```
 
-** 二进制日志事件的格式：**
+**二进制日志事件的格式：**
 
 ```
 # at 7738
@@ -263,7 +269,6 @@ exec_time=0：语句的时间戳与将其写入二进制文件中的事件差；
 error_code=0：错误代码；
 余下的为事件内容；
 ```
-
 
 GTID：Global Transaction ID：事件发生时所属的事件 ID 号；MySQL5.6 之后的版本，binglog 可能包含此项；
 
@@ -309,11 +314,11 @@ MariaDB [mydb]> SHOW VARIABLES WHERE Variable_name IN ('innodb_log_file_size','i
 3 rows in set (0.00 sec)
 ```
 
-** redo log **
+**redo log：**
 
 用于数据库崩溃时，重做已经提交事务，将没有写入数据库的数据写入；
 
-** undo log **
+**undo log：**
 
 用于数据库崩溃时，撤销未提交提交事务，已经写入数据库的数据撤销；
 
