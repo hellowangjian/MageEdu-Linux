@@ -103,7 +103,7 @@ log_level=debug
 ping_interval=3
 ping_type=INSERT
 master_binlog_dir=/mysqldata/
-#report_script=/usr/local/send_report
+report_script=/usr/local/bin/send_report
 master_ip_failover_script=/usr/local/bin/master_ip_failover
 master_ip_online_change_script=/usr/local/bin/master_ip_online_change
 secondary_check_script=/usr/bin/masterha_secondary_check -s 192.168.100.212 -s 192.168.100.213 --user=root --master_host=192.168.100.210 --master_port=3306 
@@ -124,10 +124,11 @@ hostname=192.168.100.213
 no_master=1
 ```
 
-3、准备 failover 和在线切换 perl 脚本
+3、准备`master_ip_failover` , `master_ip_online_change` , `send_report` perl 脚本
 
 `master_ip_failover` 和 `master_ip_online_change` 脚本如下，需要修改`VIP`相关配置。
 
+`send_report` 脚本需要修改相关邮箱配置。
 
 `master_ip_failover`：
 
@@ -328,6 +329,86 @@ sub usage {
     print
     "Usage: master_ip_failover --command=start|stop|stopssh|status --ssh-user=user --orig_master_host=host --orig_master_ip=ip --orig_master_port=port --new_master_host=host --new_master_ip=ip --new_master_port=port\n";
 }
+```
+
+`send_report`：
+
+```
+[root@slave3 ~]# cat /usr/local/bin/send_report 
+#!/usr/bin/perl
+
+#  Copyright (C) 2011 DeNA Co.,Ltd.
+#
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software
+#  Foundation, Inc.,
+#  51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+
+## Note: This is a sample script and is not complete. Modify the script based on your environment.
+
+use strict;
+use warnings FATAL => 'all';
+use Mail::Sender;
+use Getopt::Long;
+
+#new_master_host and new_slave_hosts are set only when recovering master succeeded
+my ( $dead_master_host, $new_master_host, $new_slave_hosts, $subject, $body );
+my $smtp='smtp.ym.163.com';
+my $mail_from='wangjian@bizvane.cn';
+my $mail_user='wangjian@bizvane.cn';
+my $mail_pass='Pqms#9vd';
+my $mail_to=['wangjian@bizvane.cn','929000201@qq.com'];
+GetOptions(
+  'orig_master_host=s' => \$dead_master_host,
+  'new_master_host=s'  => \$new_master_host,
+  'new_slave_hosts=s'  => \$new_slave_hosts,
+  'subject=s'          => \$subject,
+  'body=s'             => \$body,
+);
+
+mailToContacts($smtp,$mail_from,$mail_user,$mail_pass,$mail_to,$subject,$body);
+
+sub mailToContacts {
+    my ( $smtp, $mail_from, $user, $passwd, $mail_to, $subject, $msg ) = @_;
+    open my $DEBUG, "> /tmp/monitormail.log"
+        or die "Can't open the debug      file:$!\n";
+    my $sender = new Mail::Sender {
+        ctype       => 'text/plain; charset=utf-8',
+        encoding    => 'utf-8',
+        smtp        => $smtp,
+        from        => $mail_from,
+        auth        => 'LOGIN',
+        TLS_allowed => '0',
+        authid      => $user,
+        authpwd     => $passwd,
+        to          => $mail_to,
+        subject     => $subject,
+        debug       => $DEBUG
+    };
+
+    $sender->MailMsg(
+        {   msg   => $msg,
+            debug => $DEBUG
+        }
+    ) or print $Mail::Sender::Error;
+    return 1;
+}
+
+
+
+# Do whatever you want here
+
+exit 0;
 ```
 
 4、检查各节点 ssh 通信配置是否 OK
@@ -608,9 +689,15 @@ Wed Feb 19 07:39:46 2020 - [debug]  Disconnected from 192.168.100.213(192.168.10
 8、启动 MHA Manager 
 
 ```
-nohup masterha_manager --conf=/etc/masterha/app1.cnf  > /data/masterha/app1/manager.log 2>&1 &
+nohup masterha_manager --conf=/etc/masterha/app1.cnf --ignor-last-failover > /data/masterha/app1/manager.log 2>&1 &
+
+--ignor-last-failover: 如果最近failover 失败，MHA 将不会再次开始failover机制，因为这个问题可能再次发生。常规步骤:手动清理failover 错误文件，此文件一般在manager_workdir/app_name.failover.error文件，然后在启动failover机制。如果设置此参数，MHA 将会继续failover 不管上次的failover状态
 ```
 
 当 master 节点切换后，`masterha_manager` 服务需要重启。
+
+参考：
+<https://www.cnblogs.com/gomysql/p/3675429.html>
+<https://yq.aliyun.com/articles/203831>
 
 （完） 
